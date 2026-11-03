@@ -87,8 +87,7 @@ func _build_world() -> void:
     add_child(splatters)
 
 func _spawn_player() -> void:
-    player = CharacterBody3D.new()
-    player.set_script(PlayerScript)
+    player = PlayerScript.new()
     player.position = Vector3(0, 0.2, 15)
     add_child(player)
     player.game = self
@@ -101,8 +100,7 @@ func _spawn_enemies() -> void:
         Vector3(9, 0, 9)
     ]
     for p in positions:
-        var enemy := CharacterBody3D.new()
-        enemy.set_script(EnemyScript)
+        var enemy := EnemyScript.new()
         enemy.position = p
         enemy.add_to_group("enemies")
         add_child(enemy)
