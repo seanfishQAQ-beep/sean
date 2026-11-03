@@ -13,6 +13,8 @@ var attack_cooldown := 0.0
 var camera: Camera3D
 var hand: MeshInstance3D
 var game: Node
+var punch_tween: Tween
+const HAND_REST := Vector3(0.48, -0.44, -0.72)
 
 func _ready() -> void:
     collision_layer = 1
@@ -35,7 +37,7 @@ func _ready() -> void:
     var mat := StandardMaterial3D.new()
     mat.albedo_color = Color(0.66, 0.51, 0.45)
     hand.material_override = mat
-    hand.position = Vector3(0.48, -0.44, -0.72)
+    hand.position = HAND_REST
     camera.add_child(hand)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -80,6 +82,7 @@ func _attack() -> void:
         return
     var heavy := charge > 0.4 or detached
     attack_cooldown = 0.55 if detached else (0.4 if heavy else 0.18)
+    _animate_punch(heavy)
     var candidates := get_tree().get_nodes_in_group("enemies")
     var origin := camera.global_position
     var forward := -camera.global_transform.basis.z
@@ -101,6 +104,15 @@ func _attack() -> void:
             break
         if strikes >= 3:
             break
+
+func _animate_punch(heavy: bool) -> void:
+    if punch_tween != null and punch_tween.is_valid():
+        punch_tween.kill()
+    hand.position = HAND_REST
+    punch_tween = create_tween()
+    var reach := Vector3(0.12, -0.2, -1.35 if heavy else -1.1)
+    punch_tween.tween_property(hand, "position", reach, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    punch_tween.tween_property(hand, "position", HAND_REST, 0.22 if heavy else 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 func _finish_or_interact() -> void:
     for e in get_tree().get_nodes_in_group("enemies"):
